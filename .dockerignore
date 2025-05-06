@@ -1,0 +1,27 @@
+.git
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml
+README.md
+
+# Python
+venv/
+*.pyc
+__pycache__/
+*.egg-info/
+
+# Django
+db.sqlite3
+mediafiles/
+staticfiles/
+
+# OS specific
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env 
