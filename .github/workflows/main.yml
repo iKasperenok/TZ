@@ -65,7 +65,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Setup SSH key and agent
         run: |
-          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > /tmp/private_key
+          printf '%s\n' "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > /tmp/private_key
           chmod 600 /tmp/private_key
           # convert to PEM format for libcrypto compatibility
           ssh-keygen -p -m PEM -f /tmp/private_key -P "" -N ""
