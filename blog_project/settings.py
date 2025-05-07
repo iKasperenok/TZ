@@ -98,7 +98,9 @@ DATABASES = {
     }
 }
 
-if any("pytest" in arg for arg in sys.argv) or not all([os.getenv("DB_ENGINE"), os.getenv("DB_NAME")]):
+if any("pytest" in arg for arg in sys.argv) or not all(
+    [os.getenv("DB_ENGINE"), os.getenv("DB_NAME")]
+):
     # В fallback используем SQLite для локальной разработки и при запуске тестов
     DATABASES = {
         "default": {

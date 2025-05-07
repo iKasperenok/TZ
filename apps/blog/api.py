@@ -122,10 +122,14 @@ def create_article(request, payload: ArticleCreateSchema):
 def list_articles(request, page: int = 1, page_size: int = 10):
     """Публичный список статей с пагинацией"""
     logger.info("Запрошен список статей")
-    qs = Article.objects.all().select_related("author", "category").order_by("-created_at")
+    qs = (
+        Article.objects.all()
+        .select_related("author", "category")
+        .order_by("-created_at")
+    )
     total = qs.count()
     start = (page - 1) * page_size
-    slice_qs = qs[start: start + page_size]
+    slice_qs = qs[start : start + page_size]
     serialized = [ArticleOutSchema.from_orm(a).dict() for a in slice_qs]
     return JsonResponse({"count": total, "results": serialized})
 
@@ -298,14 +302,20 @@ def create_comment(request, article_id: int, payload: CommentCreateSchema):
     summary="Получить комментарии к статье",
     operation_id="list_comments",
 )
-def list_comments_for_article(request, article_id: int, page: int = 1, page_size: int = 10):
+def list_comments_for_article(
+    request, article_id: int, page: int = 1, page_size: int = 10
+):
     """Публичный список комментариев с пагинацией"""
     logger.info(f"Запрошены комментарии для статьи ID: {article_id}")
     article = get_object_or_404(Article, id=article_id)
-    qs = Comment.objects.filter(article=article).select_related("author").order_by("created_at")
+    qs = (
+        Comment.objects.filter(article=article)
+        .select_related("author")
+        .order_by("created_at")
+    )
     total = qs.count()
     start = (page - 1) * page_size
-    slice_qs = qs[start: start + page_size]
+    slice_qs = qs[start : start + page_size]
     serialized = [CommentOutSchema.from_orm(c).dict() for c in slice_qs]
     return JsonResponse({"count": total, "results": serialized})
 
