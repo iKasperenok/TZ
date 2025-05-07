@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import sys  # Для определения запуска через pytest
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -97,8 +98,8 @@ DATABASES = {
     }
 }
 
-if not all([os.getenv('DB_ENGINE'), os.getenv('DB_NAME')]):
-    # В fallback используем SQLite для локальной разработки и тестов
+if 'pytest' in sys.argv or not all([os.getenv('DB_ENGINE'), os.getenv('DB_NAME')]):
+    # В fallback используем SQLite для локальной разработки и при запуске тестов
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
