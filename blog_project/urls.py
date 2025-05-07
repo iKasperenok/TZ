@@ -22,8 +22,11 @@ from django.conf.urls.static import static  # Импорт для статики
 from ninja import NinjaAPI  # Импорт NinjaAPI
 from django.views.generic import RedirectView  # Для поддержки /api без слэша
 
+# Подключаем роутеры приложений
+from apps.users.api import router as users_router
+from apps.blog.api import router as blog_router  # Добавляем импорт
+
 # Инициализация API для Django Ninja
-# В будущем сюда будут добавляться роутеры из приложений apps.users и apps.blog
 api = NinjaAPI(
     version="1.0.0",
     title="Blog API",
@@ -39,10 +42,6 @@ def api_root(request):
     """
     return {"message": "Blog API is running. See /api/docs for docs."}
 
-
-# Подключаем роутеры приложений
-from apps.users.api import router as users_router
-from apps.blog.api import router as blog_router  # Добавляем импорт
 
 api.add_router(
     "/users", users_router

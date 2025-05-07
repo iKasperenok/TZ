@@ -1,18 +1,13 @@
 import logging  # Импортируем logging
 from ninja import Router
 from ninja.errors import HttpError
-from django.contrib.auth.models import (
-    User,
-)  # Нужен для type hinting и для SimpleTokenAuth
-from django.http import HttpRequest  # Для AuthBase
-
 from .schemas import UserRegisterSchema, UserLoginSchema, TokenSchema, UserSchema
 from .services import create_user_service, authenticate_user_service
 from .models import AuthToken  # Импортируем AuthToken для аутентификатора
 
-logger = logging.getLogger(__name__)  # Получаем логгер для текущего модуля
-
 from ninja.security import HttpBearer  # Используем HttpBearer
+
+logger = logging.getLogger(__name__)  # Получаем логгер для текущего модуля
 
 
 class TokenAuthBearer(HttpBearer):
