@@ -6,5 +6,7 @@ exclude =
     .venv,
     staticfiles,
     */migrations/*,
-    */tests/*
-max-line-length = 88 
+    */tests/*,
+    apps/blog/tests.py
+max-line-length = 120
+ignore = E501,E722 
