@@ -98,12 +98,12 @@ DATABASES = {
     }
 }
 
-if 'pytest' in sys.argv or not all([os.getenv('DB_ENGINE'), os.getenv('DB_NAME')]):
+if "pytest" in sys.argv or not all([os.getenv("DB_ENGINE"), os.getenv("DB_NAME")]):
     # В fallback используем SQLite для локальной разработки и при запуске тестов
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
