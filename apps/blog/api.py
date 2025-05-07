@@ -1,7 +1,6 @@
 import logging  # Импортируем logging
 from typing import List
 from ninja import Router
-from ninja.pagination import paginate, PageNumberPagination  # Для пагинации
 from ninja.errors import HttpError
 from django.http import Http404, JsonResponse  # <--- Добавляем импорт
 
@@ -114,19 +113,6 @@ def create_article(request, payload: ArticleCreateSchema):
             exc_info=True,
         )
         raise HttpError(500, "Внутренняя ошибка сервера при создании статьи.")
-
-
-# Кастомная пагинация: 'items' -> 'results'
-class ResultsPagination(PageNumberPagination):
-    items_attribute: str = "results"  # переименование 'items' в 'results'
-
-    def paginate_queryset(self, items, pagination, request=None, **kwargs):
-        # вызываем базовый метод без передачи request
-        result = super().paginate_queryset(items, pagination)
-        # переименовываем ключ 'items' в 'results'
-        if "items" in result:
-            result[self.items_attribute] = result.pop("items")
-        return result
 
 
 @router.get(
