@@ -64,7 +64,7 @@ def get_category(request, category_id: int):
 
 
 @router.post(
-    "/articles",
+    "/articles/",
     response={201: ArticleOutSchema},
     auth=TokenAuthBearer(),
     summary="Создать новую статью",
@@ -115,7 +115,7 @@ def create_article(request, payload: ArticleCreateSchema):
 
 
 @router.get(
-    "/articles",
+    "/articles/",
     response=List[ArticleOutSchema],
     summary="Получить список всех статей",
     operation_id="list_articles",
@@ -131,7 +131,7 @@ def list_articles(request):
 
 
 @router.get(
-    "/articles/{article_id}",
+    "/articles/{article_id}/",
     response=ArticleOutSchema,
     summary="Получить статью по ID",
     operation_id="get_article",
@@ -145,7 +145,7 @@ def get_article(request, article_id: int):
 
 
 @router.put(
-    "/articles/{article_id}",
+    "/articles/{article_id}/",
     response=ArticleOutSchema,
     auth=TokenAuthBearer(),
     summary="Обновить статью",
@@ -207,7 +207,7 @@ def update_article(request, article_id: int, payload: ArticleUpdateSchema):
 
 
 @router.delete(
-    "/articles/{article_id}",
+    "/articles/{article_id}/",
     response={204: None},
     auth=TokenAuthBearer(),
     summary="Удалить статью",
