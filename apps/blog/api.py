@@ -1,6 +1,6 @@
 import logging  # Импортируем logging
 from typing import List
-from ninja import Router
+from ninja import Router, Query
 from ninja.pagination import paginate, PageNumberPagination  # Для пагинации
 from ninja.errors import HttpError
 from django.http import Http404  # <--- Добавляем импорт
@@ -19,6 +19,7 @@ from .schemas import (
     CommentOutSchema,
     CommentCreateSchema,
     CommentUpdateSchema,
+    ArticleListSchema,
 )
 
 # Импортируем аутентификатор из приложения users
@@ -129,18 +130,17 @@ class ResultsPagination(PageNumberPagination):
 
 @router.get(
     "/articles/",
-    response=List[ArticleOutSchema],
+    response=ArticleListSchema,
     summary="Получить список всех статей",
     operation_id="list_articles",
 )
-@paginate(ResultsPagination, page_size=10)  # Добавляем пагинацию с 'results'
-def list_articles(request):
+def list_articles(request, page: int = Query(1), page_size: int = Query(10)):
     logger.info("Запрошен список статей")
-    return (
-        Article.objects.all()
-        .select_related("author", "category")
-        .order_by("-created_at")
-    )
+    qs = Article.objects.all().select_related("author", "category").order_by("-created_at")
+    count = qs.count()
+    start = (page - 1) * page_size
+    items = list(qs[start : start + page_size])
+    return {"count": count, "results": items}
 
 
 @router.get(

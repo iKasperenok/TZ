@@ -1,6 +1,6 @@
 from ninja import Schema
 from pydantic import Field
-from typing import Optional
+from typing import Optional, List
 import datetime
 
 
@@ -67,3 +67,9 @@ class CommentCreateSchema(Schema):
 # Схема для обновления комментария
 class CommentUpdateSchema(Schema):
     content: Optional[str] = Field(None, min_length=1)
+
+
+# Схема для листинга статей (count + results)
+class ArticleListSchema(Schema):
+    count: int
+    results: List[ArticleOutSchema]
