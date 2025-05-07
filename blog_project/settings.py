@@ -17,79 +17,83 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-load_dotenv(BASE_DIR / '.env') # Загружаем переменные из .env, который должен быть в корне проекта (TZ/.env)
+load_dotenv(
+    BASE_DIR / ".env"
+)  # Загружаем переменные из .env, который должен быть в корне проекта (TZ/.env)
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-if-not-set')
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-fallback-key-if-not-set")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 # Разрешённые хосты: по умолчанию localhost и 127.0.0.1
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
     # Сторонние приложения
-    'ninja', # Для Django Ninja
+    "ninja",  # Для Django Ninja
     # Мои приложения
-    'apps.users',
-    'apps.blog',
+    "apps.users",
+    "apps.blog",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'blog_project.urls'
+ROOT_URLCONF = "blog_project.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Для пользовательских шаблонов, включая 404.html
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [
+            BASE_DIR / "templates"
+        ],  # Для пользовательских шаблонов, включая 404.html
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'blog_project.wsgi.application'
+WSGI_APPLICATION = "blog_project.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('DB_ENGINE'),
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT', '5432'), # Порт по умолчанию, если не указан
+    "default": {
+        "ENGINE": os.getenv("DB_ENGINE"),
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT", "5432"),  # Порт по умолчанию, если не указан
     }
 }
 
@@ -109,16 +113,16 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -126,9 +130,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -138,37 +142,37 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # Корневая директория для collectstatic в production
+STATIC_URL = "static/"
+STATIC_ROOT = (
+    BASE_DIR / "staticfiles"
+)  # Корневая директория для collectstatic в production
 
 # Media files (User uploaded files)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'mediafiles'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "mediafiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --- Logging Configuration ---
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False, # Не отключать существующие логгеры Django
-    'formatters': {
-        'verbose': {
-            'format': '%(asctime)s [%(levelname)s] [%(name)s:%(lineno)d] - %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
+    "version": 1,
+    "disable_existing_loggers": False,  # Не отключать существующие логгеры Django
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s [%(levelname)s] [%(name)s:%(lineno)d] - %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-        'simple': {
-            'format': '[%(levelname)s] %(message)s'
-        },
+        "simple": {"format": "[%(levelname)s] %(message)s"},
     },
-    'handlers': {
-        'console': {
-            'level': 'INFO', # Уровень для вывода в консоль (можно DEBUG для разработки)
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
+    "handlers": {
+        "console": {
+            "level": "INFO",  # Уровень для вывода в консоль (можно DEBUG для разработки)
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
         },
         # Опциональный хендлер для записи в файл
         # 'file': {
@@ -178,29 +182,29 @@ LOGGING = {
         #     'formatter': 'verbose'
         # },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console'], # Куда идут логи от Django
-            'level': 'INFO', # Уровень логов от Django (можно WARNING для прода)
-            'propagate': False, # Не передавать логи Django родительским логгерам
+    "loggers": {
+        "django": {
+            "handlers": ["console"],  # Куда идут логи от Django
+            "level": "INFO",  # Уровень логов от Django (можно WARNING для прода)
+            "propagate": False,  # Не передавать логи Django родительским логгерам
         },
         # Логгеры для наших приложений (можно настроить разные уровни и хендлеры)
-        'apps.users': {
-            'handlers': ['console'], # 'console', 'file'
-            'level': 'DEBUG',
-            'propagate': False,
+        "apps.users": {
+            "handlers": ["console"],  # 'console', 'file'
+            "level": "DEBUG",
+            "propagate": False,
         },
-        'apps.blog': {
-            'handlers': ['console'], # 'console', 'file'
-            'level': 'INFO',
-            'propagate': False,
+        "apps.blog": {
+            "handlers": ["console"],  # 'console', 'file'
+            "level": "INFO",
+            "propagate": False,
         },
         # Корневой логгер (ловит все, что не поймали другие)
-        '': { # Пустая строка означает корневой логгер
-            'handlers': ['console'], # 'console', 'file'
-            'level': 'WARNING', # Уровень по умолчанию для всего остального
+        "": {  # Пустая строка означает корневой логгер
+            "handlers": ["console"],  # 'console', 'file'
+            "level": "WARNING",  # Уровень по умолчанию для всего остального
         },
-    }
+    },
 }
 
 # Убедитесь, что директория для логов существует, если используете file handler

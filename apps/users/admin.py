@@ -1,7 +1,3 @@
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User
-
 # Можно расширить стандартный UserAdmin, если потребуется кастомизация
 # class UserAdmin(BaseUserAdmin):
 #     pass # Добавьте здесь свои настройки list_display, list_filter, search_fields и т.д.

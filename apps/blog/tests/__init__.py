@@ -1,1 +1,1 @@
-import apps.blog.api # Попытка гарантировать загрузку API блога 
+import apps.blog.api  # Попытка гарантировать загрузку API блога

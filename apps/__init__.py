@@ -1,1 +1,1 @@
-# This file makes 'apps' a Python package 
+# This file makes 'apps' a Python package

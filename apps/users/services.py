@@ -1,13 +1,11 @@
-import secrets
-import string
-import uuid # Для генерации UUID токенов
+import uuid  # Для генерации UUID токенов
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db import IntegrityError, transaction
 
 from ninja.errors import HttpError
-from .models import AuthToken # Импортируем модель AuthToken
+from .models import AuthToken  # Импортируем модель AuthToken
 
 # Временное хранилище токенов (для демонстрации, в реальном приложении нужна БД)
 # Ключ - username, значение - token. Либо ключ - token, значение - user_id.
@@ -23,7 +21,7 @@ def generate_auth_token_for_user(user: User) -> str:
     Если у пользователя уже есть токен, он будет удален и создан новый.
     """
     # Генерируем UUID4 и берем его hex представление
-    token_key = uuid.uuid4().hex 
+    token_key = uuid.uuid4().hex
 
     with transaction.atomic():
         # Удаляем старый токен, если он существует, чтобы гарантировать OneToOne
@@ -38,15 +36,17 @@ def create_user_service(username, password):
     if not username or not password:
         raise HttpError(422, "Имя пользователя и пароль не могут быть пустыми.")
     try:
-        with transaction.atomic(): # Используем транзакцию для создания пользователя и токена
+        with transaction.atomic():  # Используем транзакцию для создания пользователя и токена
             user = User.objects.create_user(username=username, password=password)
             token_key = generate_auth_token_for_user(user)
         return user, token_key
-    except IntegrityError: # Если пользователь уже существует
+    except IntegrityError:  # Если пользователь уже существует
         raise HttpError(409, f"Пользователь с именем '{username}' уже существует.")
     except Exception as e:
         # Логирование ошибки здесь было бы полезно
-        raise HttpError(500, f"Внутренняя ошибка сервера при создании пользователя: {str(e)}")
+        raise HttpError(
+            500, f"Внутренняя ошибка сервера при создании пользователя: {str(e)}"
+        )
 
 
 def authenticate_user_service(username, password):
@@ -57,4 +57,4 @@ def authenticate_user_service(username, password):
         return user, token_key
     else:
         # Не уточняем, неправильный логин или пароль, для безопасности
-        raise HttpError(401, "Неверные учетные данные.") 
+        raise HttpError(401, "Неверные учетные данные.")
