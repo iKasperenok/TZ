@@ -69,6 +69,12 @@ class CommentUpdateSchema(Schema):
     content: Optional[str] = Field(None, min_length=1)
 
 
+# Схема для листинга комментариев (count + results)
+class CommentListSchema(Schema):
+    count: int
+    results: List[CommentOutSchema]
+
+
 # Схема для листинга статей (count + results)
 class ArticleListSchema(Schema):
     count: int

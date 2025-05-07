@@ -20,6 +20,7 @@ from .schemas import (
     CommentCreateSchema,
     CommentUpdateSchema,
     ArticleListSchema,
+    CommentListSchema,
 )
 
 # Импортируем аутентификатор из приложения users
@@ -264,7 +265,7 @@ def delete_article(request, article_id: int):
 
 
 @router.post(
-    "/articles/{article_id}/comments",
+    "/articles/{article_id}/comments/",
     response={201: CommentOutSchema},
     auth=TokenAuthBearer(),
     summary="Добавить комментарий к статье",
@@ -308,6 +309,7 @@ def create_comment(request, article_id: int, payload: CommentCreateSchema):
 
 @router.get(
     "/articles/{article_id}/comments/",
+    response=CommentListSchema,
     summary="Получить комментарии к статье",
     operation_id="list_comments",
 )
@@ -315,11 +317,7 @@ def list_comments_for_article(request, article_id: int, page: int = 1, page_size
     """Публичный список комментариев с пагинацией"""
     logger.info(f"Запрошены комментарии для статьи ID: {article_id}")
     article = get_object_or_404(Article, id=article_id)
-    qs = (
-        Comment.objects.filter(article=article)
-        .select_related("author")
-        .order_by("created_at")
-    )
+    qs = Comment.objects.filter(article=article).select_related("author").order_by("created_at")
     total = qs.count()
     start = (page - 1) * page_size
     slice_qs = qs[start : start + page_size]
@@ -328,7 +326,7 @@ def list_comments_for_article(request, article_id: int, page: int = 1, page_size
 
 
 @router.get(
-    "/comments/{comment_id}",
+    "/comments/{comment_id}/",
     response=CommentOutSchema,
     summary="Получить комментарий по ID",
     operation_id="get_comment",
@@ -342,7 +340,7 @@ def get_comment(request, comment_id: int):
 
 
 @router.put(
-    "/comments/{comment_id}",
+    "/comments/{comment_id}/",
     response=CommentOutSchema,
     auth=TokenAuthBearer(),
     summary="Обновить комментарий",
@@ -387,7 +385,7 @@ def update_comment(request, comment_id: int, payload: CommentUpdateSchema):
 
 
 @router.delete(
-    "/comments/{comment_id}",
+    "/comments/{comment_id}/",
     response={204: None},
     auth=TokenAuthBearer(),
     summary="Удалить комментарий",
