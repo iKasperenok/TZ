@@ -18,7 +18,6 @@ from .schemas import (
     CommentOutSchema,
     CommentCreateSchema,
     CommentUpdateSchema,
-    ArticleListSchema,
     CommentListSchema,
 )
 
@@ -126,7 +125,7 @@ def list_articles(request, page: int = 1, page_size: int = 10):
     qs = Article.objects.all().select_related("author", "category").order_by("-created_at")
     total = qs.count()
     start = (page - 1) * page_size
-    slice_qs = qs[start : start + page_size]
+    slice_qs = qs[start: start + page_size]
     serialized = [ArticleOutSchema.from_orm(a).dict() for a in slice_qs]
     return JsonResponse({"count": total, "results": serialized})
 
@@ -306,7 +305,7 @@ def list_comments_for_article(request, article_id: int, page: int = 1, page_size
     qs = Comment.objects.filter(article=article).select_related("author").order_by("created_at")
     total = qs.count()
     start = (page - 1) * page_size
-    slice_qs = qs[start : start + page_size]
+    slice_qs = qs[start: start + page_size]
     serialized = [CommentOutSchema.from_orm(c).dict() for c in slice_qs]
     return JsonResponse({"count": total, "results": serialized})
 
