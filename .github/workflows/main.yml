@@ -68,8 +68,8 @@ jobs:
           # Сохраняем исходный PEM PKCS8 ключ
           printf '%s\n' "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > /tmp/key.pem
           chmod 600 /tmp/key.pem
-          # Конвертируем PKCS8 в OpenSSH-совместимый формат
-          openssl pkey -in /tmp/key.pem -out /tmp/private_key
+          # Конвертируем PKCS8 (BEGIN PRIVATE KEY) в PKCS1 RSA (BEGIN RSA PRIVATE KEY)
+          openssl rsa -in /tmp/key.pem -out /tmp/private_key
           chmod 600 /tmp/private_key
       - name: Deploy commands
         run: |
