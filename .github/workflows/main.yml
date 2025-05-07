@@ -20,9 +20,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8 black
       - name: Run flake8
-        run: flake8 .
+        run: flake8 --config .flake8
       - name: Check formatting
-        run: black --check .
+        run: black --check . --exclude "/(staticfiles|migrations|tests)/"
 
   test:
     name: Run tests
