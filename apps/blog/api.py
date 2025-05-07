@@ -116,10 +116,12 @@ def create_article(request, payload: ArticleCreateSchema):
 
 # Кастомная пагинация: 'items' -> 'results'
 class ResultsPagination(PageNumberPagination):
-    items_attribute: str = "results"  # Переименование ключа 'items' в 'results'
+    items_attribute: str = "results"  # переименование 'items' в 'results'
 
-    def paginate_queryset(self, items, pagination, request, **kwargs):
-        result = super().paginate_queryset(items, pagination, request, **kwargs)
+    def paginate_queryset(self, items, pagination, request=None, **kwargs):
+        # вызываем базовый метод без передачи request
+        result = super().paginate_queryset(items, pagination)
+        # переименовываем ключ 'items' в 'results'
         if "items" in result:
             result[self.items_attribute] = result.pop("items")
         return result
