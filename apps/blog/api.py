@@ -1,9 +1,9 @@
 import logging  # Импортируем logging
 from typing import List
-from ninja import Router, Query
+from ninja import Router
 from ninja.pagination import paginate, PageNumberPagination  # Для пагинации
 from ninja.errors import HttpError
-from django.http import Http404  # <--- Добавляем импорт
+from django.http import Http404, JsonResponse  # <--- Добавляем импорт
 
 from django.shortcuts import get_object_or_404
 
@@ -130,17 +130,18 @@ class ResultsPagination(PageNumberPagination):
 
 @router.get(
     "/articles/",
-    response=ArticleListSchema,
     summary="Получить список всех статей",
     operation_id="list_articles",
 )
-def list_articles(request, page: int = Query(1), page_size: int = Query(10)):
+def list_articles(request, page: int = 1, page_size: int = 10):
+    """Публичный список статей с пагинацией"""
     logger.info("Запрошен список статей")
     qs = Article.objects.all().select_related("author", "category").order_by("-created_at")
-    count = qs.count()
+    total = qs.count()
     start = (page - 1) * page_size
-    items = list(qs[start : start + page_size])
-    return {"count": count, "results": items}
+    slice_qs = qs[start : start + page_size]
+    serialized = [ArticleOutSchema.from_orm(a).dict() for a in slice_qs]
+    return JsonResponse({"count": total, "results": serialized})
 
 
 @router.get(
@@ -306,20 +307,24 @@ def create_comment(request, article_id: int, payload: CommentCreateSchema):
 
 
 @router.get(
-    "/articles/{article_id}/comments",
-    response=List[CommentOutSchema],
+    "/articles/{article_id}/comments/",
     summary="Получить комментарии к статье",
     operation_id="list_comments",
 )
-@paginate(PageNumberPagination, page_size=10)
-def list_comments_for_article(request, article_id: int):
+def list_comments_for_article(request, article_id: int, page: int = 1, page_size: int = 10):
+    """Публичный список комментариев с пагинацией"""
     logger.info(f"Запрошены комментарии для статьи ID: {article_id}")
     article = get_object_or_404(Article, id=article_id)
-    return (
+    qs = (
         Comment.objects.filter(article=article)
         .select_related("author")
         .order_by("created_at")
     )
+    total = qs.count()
+    start = (page - 1) * page_size
+    slice_qs = qs[start : start + page_size]
+    serialized = [CommentOutSchema.from_orm(c).dict() for c in slice_qs]
+    return JsonResponse({"count": total, "results": serialized})
 
 
 @router.get(
