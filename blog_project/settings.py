@@ -97,15 +97,14 @@ DATABASES = {
     }
 }
 
-# Если вы хотите оставить возможность легко вернуться к SQLite для локальной разработки
-# без .env файла, можно добавить такую логику:
-# if not all([os.getenv('DB_ENGINE'), os.getenv('DB_NAME')]):
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.sqlite3',
-#             'NAME': BASE_DIR / 'db.sqlite3',
-#         }
-#     }
+if not all([os.getenv('DB_ENGINE'), os.getenv('DB_NAME')]):
+    # В fallback используем SQLite для локальной разработки и тестов
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
