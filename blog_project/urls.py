@@ -15,29 +15,40 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path # Убедимся, что include не используется, если не нужен
 from django.conf import settings # Импорт для настроек
 from django.conf.urls.static import static # Импорт для статики/медиа
 from ninja import NinjaAPI # Импорт NinjaAPI
+from django.views.generic import RedirectView # Для поддержки /api без слэша
 
 # Инициализация API для Django Ninja
 # В будущем сюда будут добавляться роутеры из приложений apps.users и apps.blog
 api = NinjaAPI(
-    title="Blog API",
     version="1.0.0",
+    title="Blog API",
     description="API для управления блогом, статьями и комментариями.",
     # csrf=True # Раскомментируйте, если нужна CSRF защита для HTML форм в Ninja (обычно не для REST API)
 )
 
-# Пока оставим пустым, позже добавим роутеры приложений
-# from apps.users.api import router as users_router
-# from apps.blog.api import router as blog_router
-# api.add_router("/users/", users_router, tags=["users"])
-# api.add_router("/blog/", blog_router, tags=["blog"])
+@api.get("", auth=None, summary="Health check", operation_id="api_root")
+def api_root(request):
+    """
+    Простой health-check эндпоинт, проверка доступности API.
+    """
+    return {"message": "Blog API is running. See /api/docs for docs."}
+
+# Подключаем роутеры приложений
+from apps.users.api import router as users_router
+from apps.blog.api import router as blog_router # Добавляем импорт
+
+api.add_router("/users", users_router) # Без trailing slash, если в users_router пути начинаются с /
+api.add_router("/blog", blog_router) # Добавляем роутер блога к /api/blog/
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', api.urls), # Подключаем URL-адреса Django Ninja к /api/
+    # Редирект /api на /api/ для корректного отображения API
+    path('api', RedirectView.as_view(url='/api/', permanent=False)),
+    path('api/', api.urls), # основной маршрут API
 ]
 
 # Добавляем маршруты для статических и медиа файлов в режиме DEBUG

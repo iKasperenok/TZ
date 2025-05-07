@@ -1,12 +1,7 @@
-version: '3.8'
-
 services:
   web:
     build: .
     container_name: blog_web
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/app  # Связываем текущую директорию с /app в контейнере для live-reload
     ports:
       - "8000:8000"
     env_file:

@@ -1,39 +1,50 @@
-# 1. Используем официальный образ Python нужной версии
-FROM python:3.12-slim
+# Builder stage
+FROM python:3.12-slim AS builder
 
-# Устанавливаем переменные окружения
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-# Устанавливаем рабочую директорию в контейнере
 WORKDIR /app
 
-# Устанавливаем системные зависимости (если нужны, например, для psycopg2 или других библиотек)
-# RUN apt-get update && apt-get install -y --no-install-recommends \
-#     build-essential libpq-dev \
-#  && rm -rf /var/lib/apt/lists/*
+# Optional: install system dependencies for psycopg2 if needed
+# RUN apt-get update && apt-get install -y build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
 
-# Обновляем pip
+# Upgrade pip
 RUN pip install --upgrade pip
 
-# Копируем файл с зависимостями
-COPY requirements.txt requirements.txt
+# Install Python dependencies in isolated prefix
+COPY requirements.txt .
+RUN pip install --prefix=/install -r requirements.txt
 
-# Устанавливаем зависимости
-RUN pip install -r requirements.txt
-
-# Копируем весь проект в рабочую директорию
+# Copy project code
 COPY . .
 
-# (Опционально) Создаем пользователя для запуска приложения (для безопасности)
-# RUN addgroup --system app && adduser --system --group app
-# USER app
+# Final stage
+FROM python:3.12-slim
 
-# Открываем порт, на котором будет работать приложение (стандартный для Django runserver)
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# Copy installed dependencies and code from builder
+COPY --from=builder /install /usr/local
+COPY --from=builder /app /app
+
+# Создаём группу и пользователя для запуска приложения
+RUN addgroup --system appgroup \
+    && adduser --system --ingroup appgroup appuser
+
+# Собираем статические файлы и устанавливаем права
+RUN mkdir -p /app/staticfiles \
+    && python manage.py collectstatic --noinput \
+    && chown -R appuser:appgroup /app/staticfiles
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
 EXPOSE 8000
 
-# Команда для запуска приложения
-# Для разработки:
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-# Для production обычно используют Gunicorn или uWSGI:
-# CMD ["gunicorn", "blog_project.wsgi:application", "--bind", "0.0.0.0:8000"] 
+# Start Gunicorn
+CMD ["gunicorn", "blog_project.wsgi:application", "--bind", "0.0.0.0:8000"] 

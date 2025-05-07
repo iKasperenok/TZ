@@ -1,0 +1,80 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    name: Lint code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install linters
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black
+      - name: Run flake8
+        run: flake8 .
+      - name: Check formatting
+        run: black --check .
+
+  test:
+    name: Run tests
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run pytest
+        run: pytest --cov=. 
+
+  build:
+    name: Build Docker image
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          tags: myapp:${{ github.sha }}
+
+  deploy:
+    name: Deploy to VPS
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    env:
+      PROJECT_PATH: ${{ secrets.VPS_PROJECT_PATH }}
+      ENV_FILE_CONTENT: ${{ secrets.ENV_FILE_CONTENT }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+      - name: Deploy commands
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'EOF'
+            cd $PROJECT_PATH
+            echo "$ENV_FILE_CONTENT" > .env
+            docker-compose down
+            git pull origin main
+            docker-compose up -d --build
+            docker-compose exec web python manage.py migrate --noinput
+            docker-compose exec web python manage.py collectstatic --noinput
+          EOF 

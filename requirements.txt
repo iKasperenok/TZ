@@ -4,3 +4,9 @@ sqlparse==0.5.0
 django-ninja
 psycopg2-binary
 python-dotenv
+gunicorn
+
+pytest
+pytest-django
+djangorestframework
+pytest-cov

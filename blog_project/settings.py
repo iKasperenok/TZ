@@ -29,7 +29,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-if-not-set')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = []
+# Разрешённые хосты: по умолчанию localhost и 127.0.0.1
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -63,7 +64,7 @@ ROOT_URLCONF = 'blog_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],  # Для пользовательских шаблонов, включая 404.html
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -138,7 +139,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-# STATIC_ROOT = BASE_DIR / 'staticfiles' # Раскомментируйте и настройте для collectstatic в production
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # Корневая директория для collectstatic в production
 
 # Media files (User uploaded files)
 MEDIA_URL = '/media/'
@@ -148,3 +149,60 @@ MEDIA_ROOT = BASE_DIR / 'mediafiles'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- Logging Configuration ---
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False, # Не отключать существующие логгеры Django
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s [%(levelname)s] [%(name)s:%(lineno)d] - %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'simple': {
+            'format': '[%(levelname)s] %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO', # Уровень для вывода в консоль (можно DEBUG для разработки)
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        # Опциональный хендлер для записи в файл
+        # 'file': {
+        #     'level': 'INFO', # Уровень для записи в файл
+        #     'class': 'logging.FileHandler',
+        #     'filename': BASE_DIR / 'logs/app.log', # Убедитесь, что директория logs существует
+        #     'formatter': 'verbose'
+        # },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'], # Куда идут логи от Django
+            'level': 'INFO', # Уровень логов от Django (можно WARNING для прода)
+            'propagate': False, # Не передавать логи Django родительским логгерам
+        },
+        # Логгеры для наших приложений (можно настроить разные уровни и хендлеры)
+        'apps.users': {
+            'handlers': ['console'], # 'console', 'file'
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'apps.blog': {
+            'handlers': ['console'], # 'console', 'file'
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Корневой логгер (ловит все, что не поймали другие)
+        '': { # Пустая строка означает корневой логгер
+            'handlers': ['console'], # 'console', 'file'
+            'level': 'WARNING', # Уровень по умолчанию для всего остального
+        },
+    }
+}
+
+# Убедитесь, что директория для логов существует, если используете file handler
+# LOGS_DIR = BASE_DIR / 'logs'
+# LOGS_DIR.mkdir(exist_ok=True)
