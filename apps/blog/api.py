@@ -114,13 +114,21 @@ def create_article(request, payload: ArticleCreateSchema):
         raise HttpError(500, "Внутренняя ошибка сервера при создании статьи.")
 
 
+# Кастомная пагинация: 'items' -> 'results'
+class ResultsPagination(PageNumberPagination):
+    def create_response(self, request, paginator):
+        response = super().create_response(request, paginator)
+        response['results'] = response.pop('items')  # Переименование ключа
+        return response
+
+
 @router.get(
     "/articles/",
     response=List[ArticleOutSchema],
     summary="Получить список всех статей",
     operation_id="list_articles",
 )
-@paginate(PageNumberPagination, page_size=10)  # Добавляем пагинацию
+@paginate(ResultsPagination, page_size=10)  # Добавляем пагинацию с 'results'
 def list_articles(request):
     logger.info("Запрошен список статей")
     return (
