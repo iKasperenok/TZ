@@ -63,14 +63,14 @@ jobs:
       ENV_FILE_CONTENT: ${{ secrets.ENV_FILE_CONTENT }}
     steps:
       - uses: actions/checkout@v3
-      - name: Setup SSH key and agent
+      - name: Setup SSH key
         run: |
+          # Записываем и готовим приватный ключ для подключения
           printf '%s\n' "${{ secrets.VPS_SSH_PRIVATE_KEY }}" | sed 's/^ *//' > /tmp/private_key
           chmod 600 /tmp/private_key
-          # convert to PEM format for libcrypto compatibility
+          # Преобразуем в PEM для совместимости
           ssh-keygen -p -m PEM -f /tmp/private_key -P "" -N ""
-          eval "$(ssh-agent -s)"
-          ssh-add /tmp/private_key
       - name: Deploy commands
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "cd $PROJECT_PATH && echo \"$ENV_FILE_CONTENT\" > .env && docker-compose down && git pull origin main && docker-compose up -d --build && docker-compose exec web python manage.py migrate --noinput && docker-compose exec web python manage.py collectstatic --noinput" 
+          ssh -i /tmp/private_key -o StrictHostKeyChecking=no ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            "cd $PROJECT_PATH && echo \"$ENV_FILE_CONTENT\" > .env && docker-compose down && git pull origin main && docker-compose up -d --build && docker-compose exec web python manage.py migrate --noinput && docker-compose exec web python manage.py collectstatic --noinput" 
