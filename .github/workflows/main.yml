@@ -73,12 +73,4 @@ jobs:
           ssh-add /tmp/private_key
       - name: Deploy commands
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'EOF'
-            cd $PROJECT_PATH
-            echo "$ENV_FILE_CONTENT" > .env
-            docker-compose down
-            git pull origin main
-            docker-compose up -d --build
-            docker-compose exec web python manage.py migrate --noinput
-            docker-compose exec web python manage.py collectstatic --noinput
-          EOF 
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "cd $PROJECT_PATH && echo \"$ENV_FILE_CONTENT\" > .env && docker-compose down && git pull origin main && docker-compose up -d --build && docker-compose exec web python manage.py migrate --noinput && docker-compose exec web python manage.py collectstatic --noinput" 
