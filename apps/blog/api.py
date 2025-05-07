@@ -118,6 +118,12 @@ def create_article(request, payload: ArticleCreateSchema):
 class ResultsPagination(PageNumberPagination):
     items_attribute: str = "results"  # Переименование ключа 'items' в 'results'
 
+    def paginate_queryset(self, items, pagination, request, **kwargs):
+        result = super().paginate_queryset(items, pagination, request, **kwargs)
+        if "items" in result:
+            result[self.items_attribute] = result.pop("items")
+        return result
+
 
 @router.get(
     "/articles/",
