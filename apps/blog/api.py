@@ -118,7 +118,7 @@ def create_article(request, payload: ArticleCreateSchema):
 class ResultsPagination(PageNumberPagination):
     def create_response(self, request, paginator):
         response = super().create_response(request, paginator)
-        response['results'] = response.pop('items')  # Переименование ключа
+        response["results"] = response.pop("items")  # Переименование ключа
         return response
 
 
