@@ -71,6 +71,13 @@ jobs:
           # Конвертируем PKCS8 (BEGIN PRIVATE KEY) в PKCS1 RSA (BEGIN RSA PRIVATE KEY)
           openssl rsa -in /tmp/key.pem -out /tmp/private_key
           chmod 600 /tmp/private_key
+      - name: Debug SSH public key
+        run: |
+          ssh-keygen -y -f /tmp/private_key > /tmp/public_key.pub
+          echo "Public key from private key:"
+          cat /tmp/public_key.pub
+      - name: Test SSH connection
+        run: ssh -i /tmp/private_key -o StrictHostKeyChecking=no -o BatchMode=yes ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "echo 'SSH OK'"
       - name: Deploy commands
         run: |
           ssh -i /tmp/private_key -o StrictHostKeyChecking=no ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \

@@ -1,7 +1,7 @@
 import json
 from django.test import TestCase
 from django.contrib.auth.models import User
-from apps.blog.models import Article, Category
+from apps.blog.models import Article, Category, Comment
 
 
 class BlogAPITests(TestCase):
@@ -198,13 +198,111 @@ class BlogAPITests(TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertTrue(Article.objects.filter(pk=article.pk).exists())
 
-    # TODO: Добавить тесты для Комментариев (Comments) по аналогии со статьями
-    # - Создание комментария (аутентифицированный пользователь) к существующей статье
-    # - Попытка создания комментария неаутентифицированным пользователем
-    # - Получение списка комментариев к статье (публичный доступ)
-    # - Обновление своего комментария (аутентифицированный пользователь)
-    # - Попытка обновления чужого комментария
-    # - Попытка обновления комментария неаутентифицированным пользователем
-    # - Удаление своего комментария (аутентифицированный пользователь)
-    # - Попытка удаления чужого комментария
-    # - Попытка удаления комментария неаутентифицированным пользователем
+    # --- Тесты для Комментариев (Comments) ---
+
+    def test_create_comment_authenticated(self):
+        """Тест успешного создания комментария аутентифицированным пользователем."""
+        article = Article.objects.create(author=self.user1, title="Art", content="Cnt")
+        comment_data = {"content": "Test Comment"}
+        response = self.client.post(
+            self.comments_for_article_url(article.pk),
+            data=json.dumps(comment_data),
+            content_type="application/json",
+            headers=self._get_auth_header(self.user1_token),
+        )
+        self.assertEqual(response.status_code, 201, response.content.decode())
+        data = response.json()
+        self.assertEqual(data["content"], comment_data["content"])
+        self.assertTrue(Comment.objects.filter(pk=data["id"], author=self.user1).exists())
+
+    def test_create_comment_unauthenticated(self):
+        """Тест создания комментария без аутентификации (401)."""
+        article = Article.objects.create(author=self.user1, title="Art2", content="Cnt2")
+        comment_data = {"content": "Anon Comment"}
+        response = self.client.post(
+            self.comments_for_article_url(article.pk),
+            data=json.dumps(comment_data),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 401)
+
+    def test_list_comments_public(self):
+        """Тест получения списка комментариев к статье (публично)."""
+        article = Article.objects.create(author=self.user1, title="Art3", content="Cnt3")
+        Comment.objects.create(article=article, author=self.user1, content="C1")
+        Comment.objects.create(article=article, author=self.user2, content="C2")
+        response = self.client.get(self.comments_for_article_url(article.pk))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("results", data)
+        self.assertEqual(len(data["results"]), 2)
+        self.assertIn("count", data)
+        self.assertEqual(data["count"], 2)
+
+    def test_update_own_comment_authenticated(self):
+        """Тест обновления своего комментария."""
+        article = Article.objects.create(author=self.user1, title="Art4", content="Cnt4")
+        comment = Comment.objects.create(article=article, author=self.user1, content="Orig")
+        update_data = {"content": "Updated"}
+        response = self.client.put(
+            self.comment_detail_url(comment.pk),
+            data=json.dumps(update_data),
+            content_type="application/json",
+            headers=self._get_auth_header(self.user1_token),
+        )
+        self.assertEqual(response.status_code, 200)
+        comment.refresh_from_db()
+        self.assertEqual(comment.content, update_data["content"])
+
+    def test_update_other_user_comment_forbidden(self):
+        """Тест обновления чужого комментария (403)."""
+        article = Article.objects.create(author=self.user1, title="Art5", content="Cnt5")
+        comment = Comment.objects.create(article=article, author=self.user1, content="Orig2")
+        response = self.client.put(
+            self.comment_detail_url(comment.pk),
+            data=json.dumps({"content": "Bad"}),
+            content_type="application/json",
+            headers=self._get_auth_header(self.user2_token),
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_update_comment_unauthenticated(self):
+        """Тест обновления комментария без аутентификации (401)."""
+        article = Article.objects.create(author=self.user1, title="Art6", content="Cnt6")
+        comment = Comment.objects.create(article=article, author=self.user1, content="Orig3")
+        response = self.client.put(
+            self.comment_detail_url(comment.pk),
+            data=json.dumps({"content": "AnonUpdate"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 401)
+
+    def test_delete_own_comment_authenticated(self):
+        """Тест удаления своего комментария."""
+        article = Article.objects.create(author=self.user1, title="Art7", content="Cnt7")
+        comment = Comment.objects.create(article=article, author=self.user1, content="Del")
+        response = self.client.delete(
+            self.comment_detail_url(comment.pk),
+            headers=self._get_auth_header(self.user1_token),
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(Comment.objects.filter(pk=comment.pk).exists())
+
+    def test_delete_other_user_comment_forbidden(self):
+        """Тест удаления чужого комментария (403)."""
+        article = Article.objects.create(author=self.user1, title="Art8", content="Cnt8")
+        comment = Comment.objects.create(article=article, author=self.user1, content="Del2")
+        response = self.client.delete(
+            self.comment_detail_url(comment.pk),
+            headers=self._get_auth_header(self.user2_token),
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Comment.objects.filter(pk=comment.pk).exists())
+
+    def test_delete_comment_unauthenticated(self):
+        """Тест удаления комментария без аутентификации (401)."""
+        article = Article.objects.create(author=self.user1, title="Art9", content="Cnt9")
+        comment = Comment.objects.create(article=article, author=self.user1, content="Del3")
+        response = self.client.delete(self.comment_detail_url(comment.pk))
+        self.assertEqual(response.status_code, 401)
+        self.assertTrue(Comment.objects.filter(pk=comment.pk).exists())
